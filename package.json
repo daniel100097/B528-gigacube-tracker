@@ -1,0 +1,27 @@
+{
+  "name": "B528-gigacube-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node -r dotenv/config src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daniel100097/B528-gigacube-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/daniel100097/B528-gigacube-tracker/issues"
+  },
+  "homepage": "https://github.com/daniel100097/B528-gigacube-tracker#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "fast-xml-parser": "^3.18.0",
+    "node-fetch": "^2.6.1",
+    "uuidv4": "^6.2.6"
+  }
+}
