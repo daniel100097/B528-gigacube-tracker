@@ -1,0 +1,175 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.min.js"
+      integrity="sha512-SuxO9djzjML6b9w9/I07IWnLnQhgyYVSpHZx0JV97kGBfTIsUYlWflyuW4ypnvhBrslz1yJ3R+S14fdCWmSmSA=="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.css"
+      integrity="sha512-C7hOmCgGzihKXzyPU/z4nv97W0d9bv4ALuuEbSf6hm93myico9qa0hv4dODThvCsqQUmKmLcJmlpRmCaApr83g=="
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/dayjs.min.js"
+      integrity="sha512-0fcCRl828lBlrSCa8QJY51mtNqTcHxabaXVLPgw/jPA5Nutujh6CbTdDgRzl9aSPYW/uuE7c4SffFUQFBAy6lg=="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div style="display: flex; width: 90vw; height: 500px; display: none">
+      <canvas id="networkChat" width="400" height="400"></canvas>
+    </div>
+    <div style="display: flex; width: 90vw; height: 500px">
+      <canvas id="signalChart" width="400" height="400"></canvas>
+    </div>
+    <script>
+      (async () => {
+        window.data = await fetch("/data").then((t) => t.json());
+        const data = window.data;
+
+        var ctx = document.getElementById("networkChat").getContext("2d");
+
+        var myLineChart = new Chart(ctx, {
+          type: "line",
+
+          data: {
+            labels: data.traffic.map((t) => dayjs(t.date).format("HH:mm:ss")),
+            datasets: [
+              {
+                label: "Download 1/sec",
+                backgroundColor: "blue",
+                borderColor: "blue",
+                data: data.traffic
+                  .map((t, i) => {
+                    const key = "CurrentDownload";
+
+                    if (!data.traffic[i + 1]) {
+                      return null;
+                    }
+                    const timeBetween =
+                      new Date(data.traffic[i + 1].date) -
+                      new Date(t.date).getTime();
+
+                    return (
+                      ((data.traffic[i + 1][key] - t[key]) / timeBetween) * 1000
+                    );
+                  })
+                  .map((t, i) => Math.round(t * 8e-6 * 100) / 100)
+                  .map((t, i) => {
+                    if (t > 100) {
+                      console.log(t, data.traffic[i], data.traffic[i + 1]);
+                    }
+                    return t;
+                  }),
+                fill: false,
+              },
+              {
+                label: "Upload 1/sec",
+                backgroundColor: "red",
+                borderColor: "red",
+                data: data.traffic
+                  .map((t, i) => {
+                    const key = "CurrentUpload";
+
+                    if (!data.traffic[i + 1]) {
+                      return null;
+                    }
+                    const timeBetween =
+                      new Date(data.traffic[i + 1].date) -
+                      new Date(t.date).getTime();
+
+                    return (
+                      ((data.traffic[i + 1][key] - t[key]) / timeBetween) * 1000
+                    );
+                  })
+                  .map((t, i) => Math.round(t * 8e-6 * 100) / 100),
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            spanGaps: true,
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+              point: {
+                radius: 0,
+                hitRadius: 5,
+                hoverRadius: 5,
+              },
+            },
+            scales: {
+              yAxes: [
+                {
+                  stacked: false,
+                  ticks: {},
+                },
+              ],
+            },
+          },
+        });
+      })();
+    </script>
+    <script>
+      (async () => {
+        const data = await fetch("/data").then((t) => t.json());
+
+        var ctx = document.getElementById("signalChart").getContext("2d");
+
+        var myLineChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.signal.map((t) => dayjs(t.date).format("HH:mm:ss")),
+            datasets: [
+              {
+                label: "rsrq",
+                backgroundColor: "blue",
+                borderColor: "blue",
+                data: data.signal.map((t, i) => {
+                  const key = "rsrq";
+                  console.log(t);
+                  return parseInt(t[key].replace("dBm", ""), 10);
+                }),
+                fill: false,
+              },
+              {
+                label: "sinr",
+                backgroundColor: "red",
+                borderColor: "red",
+                data: data.signal.map((t, i) => {
+                  const key = "sinr";
+                  console.log(t);
+                  return parseInt(t[key].replace("dBm", ""), 10);
+                }),
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            spanGaps: true,
+            responsive: true,
+            maintainAspectRatio: false,
+            elements: {
+              point: {
+                radius: 0,
+                hitRadius: 5,
+                hoverRadius: 5,
+              },
+            },
+            scales: {
+              yAxes: [
+                {
+                  stacked: false,
+                  ticks: {},
+                },
+              ],
+            },
+          },
+        });
+      })();
+    </script>
+  </body>
+</html>
